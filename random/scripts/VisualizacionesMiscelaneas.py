@@ -5,6 +5,10 @@ Created on Fri Aug 27 13:46:16 2021
 @author: Santiago Fernández del Castillo Sodi
 
 """
+#Les dejo unas visualizaciones graficas y de estadísticas miscelaneas/descriptivas
+#con base en la información de los archivos de JSON. Espero haber explicado lo mejor
+#posible como se usa y qué hace cada función. Cualquier cosa que no se entienda me dicen
+
 #Visualización descriptiva y gráfica de los datos
 #de un torneo y de un partido dados
 #Lo necesitamos para abrir un Json
