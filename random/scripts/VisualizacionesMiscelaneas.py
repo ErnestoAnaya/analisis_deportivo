@@ -8,6 +8,8 @@ Created on Fri Aug 27 13:46:16 2021
 #Les dejo unas visualizaciones graficas y de estadísticas miscelaneas/descriptivas
 #con base en la información de los archivos de JSON. Espero haber explicado lo mejor
 #posible como se usa y qué hace cada función. Cualquier cosa que no se entienda me dicen
+#Saqué 3 de estas funciones del curso: https://uppsala.instructure.com/courses/28112
+#Para que le echen un ojo
 
 #Visualización descriptiva y gráfica de los datos
 #de un torneo y de un partido dados
