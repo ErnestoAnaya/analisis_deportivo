@@ -132,18 +132,18 @@ def probabilityMatrixes(df, visualize = True):
     return shotMat, moveMat
 
 #%% Pruebas
-location = "D:\ExperimentosDatosPersonales\FerEsponda\Wyscout\Events\events_World_Cup.json"
+#location = "D:\ExperimentosDatosPersonales\FerEsponda\Wyscout\Events\events_World_Cup.json"
 
-df1 = extraer_posiciones_events(location)
+#df1 = extraer_posiciones_events(location)
 
-df1 = normalizarDimensiones(df1)
+#df1 = normalizarDimensiones(df1)
 
-df1['zonaInicio'] = df1.apply(lambda df: coordenadas_to_zonas(df['x_inicio'],df['y_inicio']),
-                                  axis=1)
+#df1['zonaInicio'] = df1.apply(lambda df: coordenadas_to_zonas(df['x_inicio'],df['y_inicio']),
+#                                  axis=1)
 
-df1['zonaFin'] = df1.apply(lambda df: coordenadas_to_zonas(df['x_fin'],df['y_fin']),
-                                  axis=1)
+#df1['zonaFin'] = df1.apply(lambda df: coordenadas_to_zonas(df['x_fin'],df['y_fin']),
+#                                  axis=1)
 
-s, p = probabilityMatrixes(df1)
+#s, p = probabilityMatrixes(df1)
 
     
