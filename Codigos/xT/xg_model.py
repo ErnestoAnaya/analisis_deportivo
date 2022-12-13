@@ -33,7 +33,9 @@ def get_goals(shots):
 
 def get_shots(df):
     
-    shots = df[df['eventName'] == 'Shot'] #6898 tiros totales
+    shots = df[(df['eventName'] == 'Shot') |
+               (df['subEventName'] == 'Free kick shot')] #6898 tiros totales
+    
 
     
     return shots
@@ -56,7 +58,11 @@ def process_shots(df):
             
         #Only include non-headers        
         if not(header):        
-            shots_model.at[i,'X']=100-shot['x_inicio']
+            #shots_model.at[i,'X']=100-shot['x_inicio']
+            #shots_model.at[i,'Y']=shot['y_inicio']
+            #shots_model.at[i,'C']=abs(shot['y_inicio']-50)
+            
+            shots_model.at[i,'X']=shot['x_inicio']
             shots_model.at[i,'Y']=shot['y_inicio']
             shots_model.at[i,'C']=abs(shot['y_inicio']-50)
         
