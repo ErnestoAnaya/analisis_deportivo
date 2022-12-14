@@ -40,16 +40,7 @@ df = pd.read_csv("events_World_Cup.csv", index_col=0) #eventos mundial
 event_names = pd.read_csv("eventid2name.csv") #id de eventos a nombres de eventos
 tag_names = pd.read_csv("tags2name.csv") #tags de eventos a nombres de tags
 
-#Corregir mamadas (cancha de altura 101 y no 100)
-df['y_inicio'][df.y_inicio==101]=100
-df['y_fin'][df.y_fin==101]=100
 
-
-#"Desnormalizar" cancha de 100x100 a 112x72
-df['x_inicio'] = df['x_inicio']*112/100
-df['y_inicio'] = df['y_inicio']*72/100
-df['x_fin'] = df['x_fin']*112/100
-df['y_fin'] = df['y_fin']*72/100
 
 #Para cada coordenada de un evento, su zona (cuadrante) correspondiente
 df['quad1'] = df.apply(lambda x: coordenadas_to_zonas(x['x_inicio'], x['y_inicio']), axis=1)
