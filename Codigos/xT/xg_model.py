@@ -9,7 +9,6 @@ import statsmodels.formula.api as smf
 
 import FCPython
 
-df = pd.read_csv('./../../data/wyscout_tabular/events_World_Cup.csv')
 
 
 #extraer goles
@@ -58,9 +57,6 @@ def process_shots(df):
             
         #Only include non-headers        
         if not(header):        
-            #shots_model.at[i,'X']=100-shot['x_inicio']
-            #shots_model.at[i,'Y']=shot['y_inicio']
-            #shots_model.at[i,'C']=abs(shot['y_inicio']-50)
             
             shots_model.at[i,'X']=shot['x_inicio']
             shots_model.at[i,'Y']=shot['y_inicio']
@@ -85,19 +81,9 @@ def process_shots(df):
                       (shot['tag_4'] == 101) |
                       (shot['tag_5'] == 101)):
                 shots_model.at[i,'Goal']=1 
-                
-    #posibles parametros extra
-    
-    #squaredX = shots_model['X']**2
-    #shots_model = shots_model.assign(X2=squaredX)
-    #squaredC = shots_model['C']**2
-    #shots_model = shots_model.assign(C2=squaredC)
-    #AX = shots_model['Angle']*shots_model['X']
-    #shots_model = shots_model.assign(AX=AX)
+
                 
     return shots_model
-
-
 
 def model_xg(shots_model,  model_variables = ['Angle', 'Distance']):
     '''
@@ -117,7 +103,6 @@ def model_xg(shots_model,  model_variables = ['Angle', 'Distance']):
     
     
     return model_summary, b
-
 
 
 def calculate_xG(sh, model_params, model_variables = ['Angle', 'Distance']):
@@ -168,12 +153,15 @@ def plot_xg(model_params):
 # EJEMPLO 
 #
 
-#shots_model = process_shots(df)
-#model_summary, b = model_xg(shots_model)
+df = pd.read_csv('./../../data/wyscout_tabular/events_World_Cup.csv')
 
-#shots_model['xG'] = shots_model.apply(lambda x: calculate_xG(x, b), axis=1) 
+shots_model = process_shots(df)#
 
-#plot_xg(b)
+model_summary, b = model_xg(shots_model)
+
+shots_model['xG'] = shots_model.apply(lambda x: calculate_xG(x, b), axis=1) 
+
+plot_xg(b)
 
 
 

@@ -6,7 +6,7 @@ import math
 from mplsoccer.pitch import Pitch, VerticalPitch
 import matplotlib.pyplot as plt
 import os
-from xg_model import process_shots, model_xg, calculate_xG
+from xg_model import process_shots, model_xg, calculate_xG, plot_xg
 
 
 def transitionData():
@@ -150,8 +150,8 @@ def probabilityMatrixes(df, visualize = True):
     return shotMat, moveMat
 
 def matrixTxy(df):  
-    mov_events = [30,31,32,34,70,80,81,82,83,84,85,86]
-    df_mov = df.loc[df.subEventId.isin(mov_events)]
+    mov_events = [30,31,32,34,70,80,81,82,83,84,85,86] #estos eventos son: pases, unos tiros libres y acceleration
+    df_mov = df.loc[df.subEventId.isin(mov_events)] # codigo original
     quads = list(range(1,193))
     
     #Matriz de transición para cada cuadrante
@@ -178,7 +178,7 @@ def matrixTxy(df):
     
     return True
 
-def sumando1(x,y, xg_zonas, s):
+def sumando1(x,y, xg_zonas, s, zona):
     xG = xg_zonas[xg_zonas['zonaInicio'] == zona]['xG']
     shot_probability = s[x][y]
     return shot_probability * xG
@@ -203,7 +203,7 @@ def index_to_quad(x,y):
 
 #s, p = probabilityMatrixes(df1)
 
-df = extraer_posiciones_events('./../../data/events_World_Cup.json')
+df = extraer_posiciones_events('./../../data/events_England.json')
 
 event_names = pd.read_csv("eventid2name.csv") #id de eventos a nombres de eventos
 tag_names = pd.read_csv("tags2name.csv") #tags de eventos a nombres de tags
@@ -222,7 +222,25 @@ s, p = probabilityMatrixes(df1)
 matrixTxy(df1)
 
 #%% xG Matrix
+def calc_angle(row):
+    #print(row)
+    x = 110 - row['X']
+    y1 = np.abs(35+7.32/2 - row['Y'])
+    y2 = np.abs(35-7.32/2 - row['Y'])
+    
+    l1 = np.sqrt(x**2 + y1**2)
+    l2 = np.sqrt(x**2 + y2**2)
+    l3 = 7.32
+    
+    angle = np.arccos( (l1**2 + l2**2 - l3**2)/(2*l1*l2) )
+    #if angle <0:
+    #    angle = np.pi +angle
+        
+    return angle
+
 shots_model = process_shots(df1) #only returns shots
+shots_model['Angle'] = shots_model[['X', 'Y']].apply(lambda x: calc_angle(x),axis = 1)
+
 model_summary, b = model_xg(shots_model)
 
 shots_model['xG'] = shots_model.apply(lambda x: calculate_xG(x, b), axis=1) 
@@ -244,11 +262,13 @@ xg_zonas = pd.merge(df_zonas, xg_zonas[['zonaInicio', 'xG']], how = 'outer', on 
 
 
 #%% xThreat
+import seaborn as sns  
+
 
 #tener todas las matrices a la mano
 matrices_transicion = {}
 for z in range(1,193):
-    matrices_transicion[z] = pd.read_csv(rf'C:\Users\santi\Desktop\ITAM\SportsLab\analisis_deportivo\Codigos\xT\matrix_transition_global\zona{z}.csv',
+    matrices_transicion[z] = pd.read_csv(rf'matrix_transition_global\zona{z}.csv',
                          index_col=[0]).to_numpy()
 
 #Llenar la primera matriz de puros 0
@@ -257,11 +277,16 @@ xT = np.zeros((12,16))
 #La primera iteracion del xT es s*xG
 for zona in range(1,193):
     x,y = quad_to_index(zona)
-    xT[x][y] = sumando1(x,y,xg_zonas,s)
+    #print(sumando1(x, y, xg_zonas, s))
+    xT[x][y] = sumando1(x,y,xg_zonas,s, zona)
+    
+tit = 'xT inicial'
+ax = sns.heatmap(xT).set(title=tit)
+plt.show()
 
 #Demas iteraciones
 #5 iteraciones
-for i in range(0,5):
+for n in range(0,4):
     #Para cada zona
     for z in range(1,193):
         #Indices de la zona
@@ -272,14 +297,25 @@ for i in range(0,5):
         trans = matrices_transicion[z]
         #Para cada zona
         suma = 0
-        for j in range(0,15):
-            for i in range(0,11):
+        for j in range(0,16):
+            for i in range(0,12):
               #Probabilidad de moverme de (x,y) a la zona (i,j)
               suma += trans[i][j]*xT[i][j]
+              #print(xT[i][j])
         #Actualizacion de los valores de xT
-        xT[x][y] = sumando1(x,y,xg_zonas,s) + suma*m
+        xT[x][y] = suma*m + sumando1(x,y,xg_zonas,s, z) 
         xT = np.nan_to_num(xT)
-                
+        #tit = 'trans: '+str(z)
+        #ax = sns.heatmap(trans).set(title=tit)
+        #plt.show()
         
+    tit = 'xT '+str(n)
+    ax = sns.heatmap(xT).set(title=tit)
+
+    plt.show()
         
-    
+#modificaciones hechas:
+#cambiar for loops
+#a sumando1, se le agregó un parametro z para mostrar la zona
+
+
