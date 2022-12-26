@@ -318,4 +318,15 @@ for n in range(0,4):
 #cambiar for loops
 #a sumando1, se le agregó un parametro z para mostrar la zona
 
+xg_mat = np.zeros((12,16))
+
+xg_avg = shots_model.groupby(by='zonaInicio').mean().reset_index()
+xg_avg['xG'] = xg_avg['xG']
+
+for zona in range(1,193):
+    x,y = quad_to_index(zona)
+    if xg_avg['zonaInicio'].isin([zona]).any():
+        xg_mat[x][y] = xg_avg[xg_avg['zonaInicio'] == zona]['xG']
+
+
 

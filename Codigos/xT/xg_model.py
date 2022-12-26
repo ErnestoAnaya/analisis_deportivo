@@ -40,49 +40,69 @@ def get_shots(df):
     return shots
 
 def process_shots(df):
-    #tarda mil años
-    shots = get_shots(df)
-    shots_model=pd.DataFrame(columns=['Goal','X','Y'])
-    
-    for i,shot in shots.iterrows():
-        
-        header=0
-        if ((shot['tag_0'] == 403) | #747 goles de tiros
-                      (shot['tag_1'] == 403) |
-                      (shot['tag_2'] == 403) |
-                      (shot['tag_3'] == 403) |
-                      (shot['tag_4'] == 403) |
-                      (shot['tag_5'] == 403)):
-            header = 1
-            
-        #Only include non-headers        
-        if not(header):        
-            
-            shots_model.at[i,'X']=shot['x_inicio']
-            shots_model.at[i,'Y']=shot['y_inicio']
-            shots_model.at[i,'C']=abs(shot['y_inicio']-50)
-        
-            #Distance in metres and shot angle in radians.
-            x=shots_model.at[i,'X']*105/100
-            y=shots_model.at[i,'C']*65/100
-            shots_model.at[i,'Distance']=np.sqrt(x**2 + y**2)
-            a = np.arctan(7.32 *x /(x**2 + y**2 - (7.32/2)**2))
-            if a<0:
-                a=np.pi+a
-            shots_model.at[i,'Angle'] =a
-        
-            #Was it a goal
-            shots_model.at[i,'Goal']=0
-            
-            if ((shot['tag_0'] == 101) | #747 goles de tiros
-                      (shot['tag_1'] == 101) |
-                      (shot['tag_2'] == 101) |
-                      (shot['tag_3'] == 101) |
-                      (shot['tag_4'] == 101) |
-                      (shot['tag_5'] == 101)):
-                shots_model.at[i,'Goal']=1 
+    '''
+    Versión nueva
 
-                
+    '''
+    shots_model = get_shots(df)
+    headers = "tag_0 != 403 and tag_1 != 403 and tag_2 != 403 and tag_3 != 403 and tag_4 != 403 and tag_5 != 403"
+
+    shots_model = shots_model.query(headers)
+
+    shots_model['Goal'] = np.where((shots_model['tag_0'] == 101) | 
+                          (shots_model['tag_1'] == 101) |
+                          (shots_model['tag_2'] == 101) |
+                          (shots_model['tag_3'] == 101) |
+                          (shots_model['tag_4'] == 101) |
+                          (shots_model['tag_5'] == 101), 1, 0)
+    
+
+    
+    shots_model = shots_model.rename(
+        columns={"x_inicio": "X", "y_inicio": "Y"})
+    
+    shots_model['C'] = abs(shots_model['Y'] - 50)
+    
+    shots_model['Distance']=np.sqrt((shots_model['X']*105/100)**2 + 
+                                    (shots_model['C']*65/100)**2)
+    
+    ####
+    '''
+    #alternative method to calculate the angle
+    
+    #print(row)
+    x = 110 - shots_model['X']
+    y1 = np.abs(35+7.32/2 - shots_model['Y'])
+    y2 = np.abs(35-7.32/2 - shots_model['Y'])
+    
+    l1 = np.sqrt(x**2 + y1**2)
+    l2 = np.sqrt(x**2 + y2**2)
+    l3 = 7.32
+    
+    #angle = np.arccos( (l1**2 + l2**2 - l3**2)/(2*l1*l2) )
+    
+    shots_model['Angle'] = angle
+    shots_model['Angle'] = np.where(angle<0, np.pi+angle, angle)
+    '''
+    #####
+    
+    #original method to calculate the angle
+    
+    a = np.arctan(7.32 *(shots_model['X']*105/100) /
+                  ((shots_model['X']*105/100)**2 + (shots_model['C']*65/100)**2 - (7.32/2)**2))
+    
+    shots_model['Angle'] = np.where(a<0, np.pi+a, a)
+            
+    #posibles parametros extra
+    
+    #squaredX = shots_model['X']**2
+    #shots_model = shots_model.assign(X2=squaredX)
+    #squaredC = shots_model['C']**2
+    #shots_model = shots_model.assign(C2=squaredC)
+    #AX = shots_model['Angle']*shots_model['X']
+    #shots_model = shots_model.assign(AX=AX)
+    shots_model['Goal'] = shots_model['Goal'].astype(str)
+    
     return shots_model
 
 def model_xg(shots_model,  model_variables = ['Angle', 'Distance']):
@@ -157,11 +177,23 @@ df = pd.read_csv('./../../data/wyscout_tabular/events_World_Cup.csv')
 
 shots_model = process_shots(df)#
 
+###
+
+
+
+###
+
 model_summary, b = model_xg(shots_model)
 
 shots_model['xG'] = shots_model.apply(lambda x: calculate_xG(x, b), axis=1) 
 
+print(model_summary)
 plot_xg(b)
+
+import seaborn as sns
+sns.scatterplot(data = shots_model, x = 'X', y = 'Y', hue='xG')
+
+
 
 
 
