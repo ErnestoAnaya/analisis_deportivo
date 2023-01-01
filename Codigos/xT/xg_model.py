@@ -67,8 +67,10 @@ def process_shots(df):
                                     (shots_model['C']*65/100)**2)
     
     ####
-    '''
+    
     #alternative method to calculate the angle
+    shots_model['Distance']=np.sqrt((shots_model['X']-110)**2 + 
+                                    (np.abs(shots_model['Y']-35))**2)
     
     #print(row)
     x = 110 - shots_model['X']
@@ -79,19 +81,20 @@ def process_shots(df):
     l2 = np.sqrt(x**2 + y2**2)
     l3 = 7.32
     
-    #angle = np.arccos( (l1**2 + l2**2 - l3**2)/(2*l1*l2) )
+    angle = np.arccos( (l1**2 + l2**2 - l3**2)/(2*l1*l2) )
     
     shots_model['Angle'] = angle
     shots_model['Angle'] = np.where(angle<0, np.pi+angle, angle)
-    '''
+    
     #####
     
     #original method to calculate the angle
-    
+    '''
     a = np.arctan(7.32 *(shots_model['X']*105/100) /
                   ((shots_model['X']*105/100)**2 + (shots_model['C']*65/100)**2 - (7.32/2)**2))
     
     shots_model['Angle'] = np.where(a<0, np.pi+a, a)
+    '''
             
     #posibles parametros extra
     
