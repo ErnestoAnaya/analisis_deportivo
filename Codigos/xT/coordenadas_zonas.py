@@ -7,7 +7,7 @@ from mplsoccer.pitch import Pitch, VerticalPitch
 import matplotlib.pyplot as plt
 import os
 from xg_model import process_shots, model_xg, calculate_xG, plot_xg
-
+from functools import reduce
 
 def transitionData():
     df = pd.read_csv("events_World_Cup.csv", index_col=0) #eventos mundial
@@ -329,4 +329,160 @@ for zona in range(1,193):
         xg_mat[x][y] = xg_avg[xg_avg['zonaInicio'] == zona]['xG']
 
 
+#%% Obtencion xT individual
+# xTA y Riesgo
 
+#Jugada por jugada (eventos)
+# Coordenadas a Zonas
+# Diferencial entre xT de zonas
+# Resta y group by player Id -> sum
+
+#Riesgo (¿qué eventos considero riesgo?)
+#Lo mismo acciones defensivas
+
+#Cummulative: 
+    # Restas 1 a 1
+    
+#%% xT inidividual
+#GLOBAL
+
+def xTPreprocessing(xT, type_ = 1):
+    
+    if type_:
+        row = np.arange(1, 192, 12)
+        mat = np.array([row+i for i in range(12)])
+    else:
+        mat = np.flip(np.flip(mat,axis=1),axis=0)
+
+    matf = mat.flatten()
+    xTf = xT.flatten()
+
+    zonexT = {k:v for k, v in zip(matf, xTf)}
+
+    return zonexT
+
+def jugadoresDF():
+    
+    with open(r"D:\ExperimentosDatosPersonales\FerEsponda\Wyscout\players.json") as f:
+        jugadores = json.load(f)
+        
+    jugadores = pd.json_normalize(jugadores, sep = "_")
+    
+    jugadores['Name'] = jugadores['firstName'] + ' ' + jugadores['lastName']
+    
+    jugadores = jugadores[['Name','wyId','role_name']]
+    
+    jugadores.rename(columns={"wyId": "playerId"}, inplace=True)
+    
+    return jugadores
+
+jugadores = jugadoresDF()
+
+def xTPlayers(id_equipo=-1):
+    if id_equipo == -1:
+        aux = df1.copy()
+    else:
+        aux = df1[df1['teamId']==id_equipo]
+        
+    zonexTf = xTPreprocessing(xT)
+        
+    events = ['Simple pass', 'High pass', 'Head pass','Smart pass',
+              'Free Kick', 'Cross', 'Shot','Corner',
+              'Acceleration','Free kick cross', 'Free kick shot']
+        
+    aux = aux[aux['subEventName'].isin(events)]
+        
+    aux.replace({'zonaInicio': zonexTf,'zonaFin': zonexTf},inplace=True)
+    aux['xT'] = aux['zonaFin'] - aux['zonaInicio']
+    aux = aux.groupby('playerId')['xT'].sum()
+    aux.sort_values(ascending=False, inplace = True)
+    
+    aux2 = pd.merge(aux,jugadores,on='playerId',how='left')
+    
+    del aux
+    
+    aux2.sort_values(by=['xT'], ascending=False, inplace=True)
+    
+    return aux2
+    
+
+def xTSaved_Players(id_equipo=-1):
+    if id_equipo == -1:
+        aux = df1.copy()
+    else:
+        aux = df1[df1['teamId']==id_equipo]
+        
+    zonexTf = xTPreprocessing(xT,0)    
+    
+    events = ['Ground defending duel', 'Clearance']
+    
+    aux = aux[aux['subEventName'].isin(events)]
+    
+    tags = ['703','1401','1501','2101','602']
+    
+    headers = ''
+    
+    for t in tags:
+        for i in range(0,6):
+            headers += f'tag_{i} == {t} or '
+    
+    headers = headers[:-4]
+    
+    aux = aux.query(headers)
+        
+    aux.replace({'zonaInicio': zonexTf,'zonaFin': zonexTf},inplace=True)
+    aux['xTSaved'] = aux['zonaInicio']
+    aux = aux.groupby('playerId')['xTSaved'].sum()
+    aux.sort_values(ascending=False, inplace = True)
+    
+    aux2 = pd.merge(aux,jugadores,on='playerId',how='left')
+    
+    del aux
+    
+    aux2.sort_values(by=['xTSaved'], ascending=False, inplace=True)
+    
+    return aux2
+    
+def xTRisk(id_equipo=-1):
+    if id_equipo == -1:
+        aux = df1.copy()
+    else:
+        aux = df1[df1['teamId']==id_equipo]
+            
+    tags = ['102','2001','1302','601','701']
+    
+    zonexTf = xTPreprocessing(xT,0)
+    
+    headers = ''
+    
+    for t in tags:
+        for i in range(0,6):
+            headers += f'tag_{i} == {t} or '
+    
+    headers = headers[:-4]
+    
+    aux = aux.query(headers)
+        
+    aux.replace({'zonaInicio': zonexTf,'zonaFin': zonexTf},inplace=True)
+    aux['xTRisk'] = aux['zonaInicio']
+    aux = aux.groupby('playerId')['xTRisk'].sum()
+    aux.sort_values(ascending=False, inplace = True)
+    
+    aux2 = pd.merge(aux,jugadores,on='playerId',how='left')
+    
+    del aux
+    
+    aux2.sort_values(by=['xTRisk'], ascending=False, inplace=True)
+    
+    return aux2
+
+# CASO DE USO
+# data_frames = [xTPlayers(),xTSaved_Players(),xTRisk()]
+
+# res = reduce(lambda left,right: pd.merge(left,right,on=['playerId'],
+#                                          how='outer'), data_frames).fillna(0)
+# res = res[['playerId','Name_x','role_name_x','xT','xTSaved','xTRisk']]
+
+# res['Total'] = res['xT'] + res['xTSaved'] - res['xTRisk']
+    
+    
