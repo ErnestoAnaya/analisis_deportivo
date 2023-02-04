@@ -3,6 +3,7 @@ data/wyscout_tabular/
 data/wyscout/Events/
 Codigos/vaep/catboost_info/
 
+.DS_Store
 
 ### Python common git ignore
 
