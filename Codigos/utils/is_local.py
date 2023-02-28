@@ -26,10 +26,10 @@ def extraer_posiciones_events(location):
     df=pd.DataFrame(data)
     return df
 
-event_names = pd.read_csv("eventid2name.csv") #id de eventos a nombres de eventos
-tag_names = pd.read_csv("tags2name.csv") #tags de eventos a nombres de tags
+#event_names = pd.read_csv("eventid2name.csv") #id de eventos a nombres de eventos
+#tag_names = pd.read_csv("tags2name.csv") #tags de eventos a nombres de tags
 
-df = extraer_posiciones_events('./../../data/events_World_Cup.json')
+#df = extraer_posiciones_events('./../../data/events_World_Cup.json')
 
 #%% Extraer Localia
 
@@ -41,8 +41,8 @@ def datos_equipo(location):
     equipos=pd.read_json(location)
     return equipos
 
-partidos = datos_partidos(r".\..\..\data\matches_World_Cup.json")
-teams = datos_partidos(r".\..\..\data\teams.json")
+# partidos = datos_partidos(r".\..\..\data\matches_World_Cup.json")
+# teams = datos_partidos(r".\..\..\data\teams.json")
 
 def extraer_locales(partidos, equipos):
     aux = partidos.copy()
@@ -72,7 +72,7 @@ def extraer_locales(partidos, equipos):
     
     return aux
 
-localia = extraer_locales(partidos, teams)
+#localia = extraer_locales(partidos, teams)
 
 def asignar_localia(match_id, team_id, localia):
     local = localia['local'][match_id]
@@ -84,7 +84,7 @@ def asignar_localia(match_id, team_id, localia):
     return None
 
 #Uso:
-df['is_local'] = df.apply(lambda x: asignar_localia(x.matchId,x.teamId, localia),
-                          axis=1)
+# df['is_local'] = df.apply(lambda x: asignar_localia(x.matchId,x.teamId, localia),
+#                           axis=1)
 
     
