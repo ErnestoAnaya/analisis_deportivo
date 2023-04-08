@@ -1,5 +1,10 @@
 from utils.futbot_nlp import *
 
+#PENDIENTES
+## Cambiar llamadas a GPT3 intermedias por TAPAS API Sentence Similarity https://huggingface.co/docs/api-inference/detailed_parameters#sentence-similarity-task
+## Finetune con data nueva https://platform.openai.com/docs/guides/fine-tuning
+## Frontend en Flask
+
 entrada = ""
 while(entrada!="Salir"):
     print("¡Hola! Mi nombre es FutBot y estoy aquí para ayudarte. Cuento con datos hasta la temporada 19-20.")
@@ -38,7 +43,7 @@ while(entrada!="Salir"):
                     equipos_liga_options = equipos_liga + ["salir, atras"]
                     equipo = str(input())
                     print()
-                    entrada = str(get_gpt3_completion(f"To which of these strings is the string '{equipo}' more similar to? If you find an exact match in the list, print the exact match. Only answer with one of the strings, and if there is no clear match, print 'Again'. The strings to check are: "+str(equipos_liga_options)))
+                    entrada = str(get_gpt3_completion(f"To which of these strings is the string '{equipo}' more similar to? If you find an exact match in the list, print the exact match. If there is no clear match, print 'Again'. The strings to check are: {str(equipos_liga_options)}. Only answer with one of the strings and print it."))
                     entrada = entrada.replace("\n\n ", '')
                     entrada = entrada.replace("\n\n", '')
                     equipo = entrada
@@ -71,7 +76,7 @@ while(entrada!="Salir"):
                             list_players_options = list_players + ["salir, atras"]
                             player = str(input())
                             print()
-                            entrada = str(get_gpt3_completion(f"To which of these strings is the string '{player}' more similar to? If you find an exact match in the list, print the exact match. Only answer with one of the strings, and if there is no clear match, print 'Again'. The strings to check are: "+str(list_players_options)))
+                            entrada = str(get_gpt3_completion(f"To which of these strings is the string '{player}' more similar to? If you find an exact match in the list, print the exact match. If there is no clear match, print 'Again'. The strings to check are: {str(list_players_options)}. Only answer with one of the strings."))
                             entrada = entrada.replace("\n\n ", '')
                             entrada = entrada.replace("\n\n", '')
                             player = entrada
