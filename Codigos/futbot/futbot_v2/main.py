@@ -1,9 +1,9 @@
 from utils.futbot_nlp import *
 
 #PENDIENTES
-## Cambiar llamadas a GPT3 intermedias por TAPAS API Sentence Similarity https://huggingface.co/docs/api-inference/detailed_parameters#sentence-similarity-task
-## Finetune con data nueva https://platform.openai.com/docs/guides/fine-tuning
-## Frontend en Flask
+## Cambiar llamadas a GPT3 intermedias por TAPAS API Sentence Similarity https://huggingface.co/docs/api-inference/detailed_parameters#sentence-similarity-task (sebas)
+## Finetune con data nueva https://platform.openai.com/docs/guides/fine-tuning (chequen el apartado - sobre todo el ultimo ejemplo - de preparing your dataset y chance les sirven los example notebooks)
+## Frontend en Flask (sebas)
 
 entrada = ""
 while(entrada!="Salir"):
